@@ -1,0 +1,128 @@
+// Copyright (C) 1991-2013 Altera Corporation
+// Your use of Altera Corporation's design tools, logic functions 
+// and other software and tools, and its AMPP partner logic 
+// functions, and any output files from any of the foregoing 
+// (including device programming or simulation files), and any 
+// associated documentation or information are expressly subject 
+// to the terms and conditions of the Altera Program License 
+// Subscription Agreement, Altera MegaCore Function License 
+// Agreement, or other applicable license agreement, including, 
+// without limitation, that your use is for the sole purpose of 
+// programming logic devices manufactured by Altera and sold by 
+// Altera or its authorized distributors.  Please refer to the 
+// applicable agreement for further details.
+
+// *****************************************************************************
+// This file contains a Verilog test bench template that is freely editable to  
+// suit user's needs .Comments are provided in each section to help the user    
+// fill out necessary details.                                                  
+// *****************************************************************************
+// Generated on "12/14/2021 18:09:48"
+                                                                                
+// Verilog Test Bench template for design : spi_module_master
+// 
+// Simulation tool : ModelSim (Verilog)
+// 
+
+`timescale 1 ps/ 1 ps
+module spi_test();
+// test vector input registers
+reg CLOCK;
+reg CPHA;
+reg CPOL;
+reg I_rx_en_m;
+wire I_spi_miso;
+reg I_tx_en_m;
+reg RESET_m;
+reg [7:0] iData_m;
+// wires                                               
+wire O_spi_cs;
+wire O_spi_mosi;
+wire O_spi_sck;
+wire iDone_m;
+wire [7:0]  oData_m;
+wire oDone_m;
+
+
+reg I_rx_en_s;
+reg I_tx_en_s;
+reg RESET_s;
+reg [7:0] iData_s;
+wire iDone_s;
+wire [7:0]  oData_s;
+wire oDone_s;
+
+// assign statements (if any)                          
+spi_module_master test_body_m(
+// port map - connection between master ports and signals/registers   
+	.CLOCK(CLOCK),
+	.CPHA(CPHA),
+	.CPOL(CPOL),
+	.I_rx_en(I_rx_en_m),
+	.I_spi_miso(I_spi_miso),
+	.I_tx_en(I_tx_en_m),
+	.O_spi_cs(O_spi_cs),
+	.O_spi_mosi(O_spi_mosi),
+	.O_spi_sck(O_spi_sck),
+	.RESET(RESET_m),
+	.iData(iData_m),
+	.iDone(iDone_m),
+	.oData(oData_m),
+	.oDone(oDone_m)
+);
+spi_module_slave test_body_s(
+// port map - connection between master ports and signals/registers   
+	.CPHA(CPHA),
+	.CPOL(CPOL),
+	.I_rx_en(I_rx_en_s),
+	.O_spi_miso(I_spi_miso),
+	.I_tx_en(I_tx_en_s),
+	.I_spi_cs(O_spi_cs),
+	.I_spi_mosi(O_spi_mosi),
+	.I_spi_sck(O_spi_sck),
+	.RESET(RESET_s),
+	.iData(iData_s),
+	.iDone(iDone_s),
+	.oData(oData_s),
+	.oDone(oDone_s)
+);
+initial                                                
+begin                                                  
+// code that executes only once                        
+// insert code here --> begin                          
+	CLOCK<=0;
+	I_tx_en_m<=1'b1;
+	I_rx_en_m<=1'b1;
+	I_rx_en_s<=1'b1;
+	I_tx_en_s<=1'b1;
+	iData_m<=8'd0;
+	iData_s<=8'd0;
+	CPOL<=1'b0;
+	CPHA<=1'b0;
+	RESET_m<=1'b1;
+	RESET_s<=1'b1;
+	#20
+	RESET_m<=1'b0;
+	RESET_s<=1'b0;
+// --> end                                             
+$display("Running testbench");                       
+end                                                    
+always #10 CLOCK<=~CLOCK;
+always@ (posedge oDone_m)                                       
+begin                     
+	if(iData_m==8'hff) begin
+		$stop;
+	end                            
+	iData_m<=iData_m+8'h01;
+//@eachvec;                                              
+// --> end                                             
+end       
+always@ (posedge oDone_s)
+begin
+	if(iData_s==8'hff) begin
+		$stop;
+	end
+	iData_s<=iData_s+8'h01;
+end                                             
+endmodule
+

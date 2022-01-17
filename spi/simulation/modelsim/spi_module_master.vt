@@ -34,24 +34,26 @@ reg I_rx_en_m;
 wire I_spi_miso;
 reg I_tx_en_m;
 reg RESET_m;
-reg [7:0] iData_m;
+wire [7:0] iData_m;
 // wires                                               
 wire O_spi_cs;
 wire O_spi_mosi;
 wire O_spi_sck;
 wire iDone_m;
-wire [7:0]  oData_m;
+reg [7:0]  oData_m;
 wire oDone_m;
 
 
 reg I_rx_en_s;
 reg I_tx_en_s;
 reg RESET_s;
-reg [7:0] iData_s;
+wire [7:0] iData_s;
 wire iDone_s;
-wire [7:0]  oData_s;
+reg [7:0]  oData_s;
 wire oDone_s;
-
+reg done_m;
+reg done_s;
+reg [1:0] mod;
 // assign statements (if any)                          
 spi_module_master test_body_m(
 // port map - connection between master ports and signals/registers   
@@ -95,13 +97,16 @@ begin
 	I_rx_en_m<=1'b1;
 	I_rx_en_s<=1'b1;
 	I_tx_en_s<=1'b1;
-	iData_m<=8'd0;
-	iData_s<=8'd0;
+	oData_m<=8'd0;
+	oData_s<=8'd0;
 	CPOL<=1'b0;
-	CPHA<=1'b0;
+	CPHA<=1'b1;
 	RESET_m<=1'b1;
 	RESET_s<=1'b1;
-	#20
+	done_m<=1'b0;
+	done_s<=1'b0;
+	mod<=2'b0;
+	#40
 	RESET_m<=1'b0;
 	RESET_s<=1'b0;
 // --> end                                             
@@ -110,19 +115,35 @@ end
 always #10 CLOCK<=~CLOCK;
 always@ (posedge oDone_m)                                       
 begin                     
-	if(iData_m==8'hff) begin
-		$stop;
+	if(oData_m==8'hff) begin
+		done_m<=1'b1;
 	end                            
-	iData_m<=iData_m+8'h01;
+	oData_m=oData_m+8'h01;
 //@eachvec;                                              
 // --> end                                             
-end       
+end
 always@ (posedge oDone_s)
 begin
-	if(iData_s==8'hff) begin
+	if(oData_s==8'hff) begin
+		done_s<=1'b1;
+	end
+	oData_s=oData_s+8'h01;
+end 
+wire done=done_m&done_s;          
+always@(posedge done) begin
+	done_m<=1'b0;
+	done_s<=1'b0;
+	CPHA<=mod&2'b01;
+	CPOL<=mod&2'b10;
+	RESET_m<=1'b1;
+	RESET_s<=1'b1;
+	#40
+	RESET_m<=1'b0;
+	RESET_s<=1'b0;
+	if(mod==2'd3) begin 
 		$stop;
 	end
-	iData_s<=iData_s+8'h01;
-end                                             
+	mod=mod+2'b1;
+end                                  
 endmodule
 
